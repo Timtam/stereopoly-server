@@ -1,0 +1,68 @@
+swagger: "2.0"
+info:
+  description: Stereopoly REST Api
+  version: "1.0.0"
+  title: Stereopoly REST Api
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+basePath: "/api"
+
+paths:
+  /boards:
+    get:
+      operationId: "stereopoly.api.boards.get"
+      tags:
+        - "Boards"
+      summary: "Board structure of the Stereopoly App"
+      description: "Retrieve all boards currently in the database"
+      responses:
+        200:
+          description: "Successful read board list operation"
+          schema:
+            type: "array"
+            items:
+              properties:
+                name:
+                  type: "string"
+                version:
+                  type: "integer"
+                id:
+                  type: "integer"
+
+parameters:
+  apiVersion:
+    in: query
+    name: api-version
+    type: string
+    format: string
+    description: Api version to use
+    required: true
+    default: '1.0.0'
+
+responses:
+  error:
+    description: An error has occured while handling the request. Check the content of the message for the error details.
+    schema:
+      $ref: '#/definitions/error'
+
+definitions:
+  error:
+    type: object
+    description: Describes the error that occured during the request.
+    properties:
+      code:
+        type: string
+        description: The error code that occured.
+      message:
+        type: string
+        description: A user readable message that describes the error in detail for the developer.
+      meta:
+        type: object
+        description: |
+          Contains more information about the error message. For example when a validation error occurs, this field describes the fields that were invalid and the validation error that occured. The content of this object can vary based on the type of error.
+    required:
+      - code
+      - message

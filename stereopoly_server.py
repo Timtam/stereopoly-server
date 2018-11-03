@@ -9,7 +9,7 @@ import os
 
 app = connexion.App(__name__, specification_dir = './')
 app.app.config.from_object(Config)
-#app.add_api("stereopoly.yml")
+app.add_api("stereopoly.yml")
 
 globals.DB = db_setup()
 
