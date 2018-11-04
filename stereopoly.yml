@@ -8,61 +8,54 @@ consumes:
 produces:
   - "application/json"
 
-basePath: "/api"
-
-paths:
-  /boards:
-    get:
-      operationId: "stereopoly.api.boards.get"
-      tags:
-        - "Boards"
-      summary: "Board structure of the Stereopoly App"
-      description: "Retrieve all boards currently in the database"
-      responses:
-        200:
-          description: "Successful read board list operation"
-          schema:
-            type: "array"
-            items:
-              properties:
-                name:
-                  type: "string"
-                version:
-                  type: "integer"
-                id:
-                  type: "integer"
+basePath: /api
 
 parameters:
   apiVersion:
     in: query
-    name: api-version
+    name: api
     type: string
-    format: string
-    description: Api version to use
-    required: true
-    default: '1.0.0'
+    description: API version used
+    required: false
+    default: "1.0.0"
 
 responses:
   error:
-    description: An error has occured while handling the request. Check the content of the message for the error details.
+    description: An error has occurred while handling the request. Check the error text for more details.
     schema:
       $ref: '#/definitions/error'
 
 definitions:
   error:
     type: object
-    description: Describes the error that occured during the request.
+    description: Describes the error that occurred during the request.
     properties:
-      code:
+      error:
         type: string
-        description: The error code that occured.
-      message:
-        type: string
-        description: A user readable message that describes the error in detail for the developer.
-      meta:
-        type: object
-        description: |
-          Contains more information about the error message. For example when a validation error occurs, this field describes the fields that were invalid and the validation error that occured. The content of this object can vary based on the type of error.
-    required:
-      - code
-      - message
+        description: The error text.
+
+paths:
+  /boards:
+    parameters:
+      - $ref: '#/parameters/apiVersion'
+    get:
+      operationId: stereopoly.api.boards.get
+      tags:
+        - "Boards"
+      summary: Board structure of the Stereopoly App
+      description: Retrieve all boards currently in the database
+      responses:
+        200:
+          description: Successful read board list operation
+          schema:
+            type: array
+            items:
+              properties:
+                name:
+                  type: string
+                version:
+                  type: integer
+                id:
+                  type: integer
+        400:
+          $ref: '#/responses/error'
