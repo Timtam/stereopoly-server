@@ -35,6 +35,22 @@ class Board(Base):
   version = Column(Integer, nullable=False)
   scheme = relationship('MoneyScheme', foreign_keys=[money_scheme])
 
+class News(Base):
+  __tablename__ = "news"
+  id = Column(Integer, primary_key=True)
+  text = Column(Unicode, nullable = False)
+
+class BoardNews(Base):
+  __tablename__ = "boardnews"
+  board_id = Column(Integer, ForeignKey('boards.id'), nullable = False)
+  news_id = Column(Integer, ForeignKey('news.id'), nullable = False)
+  board = relationship('Boards', foreign_keys=[board_id])
+  news = relationship('News', foreign_keys=[news_id])
+  __table_args__ = (
+    Index('boardnews_index', 'board_id', 'news_id', unique=True),
+    PrimaryKeyConstraint('board_id', 'news_id')
+  )
+
 def setup():
   global Base
   engine = create_engine('sqlite:///stereopoly.db')
