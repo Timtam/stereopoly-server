@@ -1,0 +1,16 @@
+1:
+  name: "{0} €"
+  money1: 10
+  money2: 50
+  money3: 200
+  money4: 500
+  money5: 1000
+  money6: 5000
+2:
+  name: "{0} DM"
+  money1: 20
+  money2: 100
+  money3: 200
+  money4: 500
+  money5: 2000
+  money6: 10000

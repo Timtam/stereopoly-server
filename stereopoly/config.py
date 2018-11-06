@@ -6,5 +6,7 @@ class Config(object):
   DEBUG = True
   CSRF_ENABLED = True
 
+BOARDS_FILE = os.path.join(get_script_directory(), 'var', 'boards.yml')
+MONEY_SCHEMES_FILE = os.path.join(get_script_directory(), 'var', 'money.yml')
 NEWS_FILE = os.path.join(get_script_directory(), "var", "news.yml")
 SUPPORTED_APP_VERSION = "1.0.0"

@@ -32,24 +32,14 @@ class Board(Base):
   id = Column(Integer, primary_key=True)
   name = Column(Unicode, unique=True, nullable = False)
   money_scheme = Column(Integer, ForeignKey('money_schemes.id'), nullable = False)
-  version = Column(Integer, nullable=False)
+  version = Column(Integer, nullable=False, default = 1)
   scheme = relationship('MoneyScheme', foreign_keys=[money_scheme])
 
 class News(Base):
   __tablename__ = "news"
   id = Column(Integer, primary_key=True)
   text = Column(Unicode, nullable = False)
-
-class BoardNews(Base):
-  __tablename__ = "boardnews"
-  board_id = Column(Integer, ForeignKey('boards.id'), nullable = False)
-  news_id = Column(Integer, ForeignKey('news.id'), nullable = False)
-  board = relationship('Boards', foreign_keys=[board_id])
-  news = relationship('News', foreign_keys=[news_id])
-  __table_args__ = (
-    Index('boardnews_index', 'board_id', 'news_id', unique=True),
-    PrimaryKeyConstraint('board_id', 'news_id')
-  )
+  version = Column(Integer, nullable = False, default = 1)
 
 def setup():
   global Base

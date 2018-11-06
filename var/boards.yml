@@ -1,0 +1,6 @@
+1:
+  name: "Classic €"
+  money_scheme: 1
+2:
+  name: "Classic DM"
+  money_scheme: 2
