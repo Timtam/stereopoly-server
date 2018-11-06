@@ -18,11 +18,19 @@ class Indexer(object):
 
     self.load_files()
 
+    for news_id in self.__news:
+      news = self.__news[news_id]
+      news['id'] = news_id
+      print("Indexing news (id={0})".format(news_id))
+      self.index_news(news, session)
+
     for board_id in self.__boards:
       board = self.__boards[board_id]
       board['id'] = board_id
       print("Indexing board '{0}' (id={1})".format(board['name'], board_id))
-      self.index_board(board)
+      self.index_board(board, session)
+
+    session.commit()
 
   def load_files(self):
     with open(NEWS_FILE, "r") as f:
@@ -32,5 +40,22 @@ class Indexer(object):
     with open(BOARDS_FILE, "r") as f:
       self.__boards = yaml_load(f, Loader=yaml_loader)
 
-  def index_board(self, board):
+  def index_board(self, board, session):
     pass
+
+  def index_news(self, news, session):
+    changed = False
+    db_news = session.query(News).filter_by(id = news['id']).first()
+    if not db_news:
+      session.add(News(**news))
+      print("New news added.")
+    else:
+      if news['text'] != db_news.text:
+        print("News text changed, updating text.")
+        db_news.text = news['text']
+        changed = True
+      if changed:
+        print("News was changed, increasing version to v{0}".format(db_news.version + 1))
+        db_news.version += 1
+      else:
+        print("No changes detected.")

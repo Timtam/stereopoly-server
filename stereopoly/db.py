@@ -27,6 +27,14 @@ class MoneyScheme(Base):
     m = [self.money1, self.money2, self.money3, self.money4, self.money5, self.money6, self.money7, self.money8, self.money9, self.money10]
     return tuple([c for c in m if m])
 
+class Boardnews(Base):
+  __tablename__ = "boardnews"
+  board_id = Column(Integer, ForeignKey('boards.id'))
+  news_id = Column(Integer, ForeignKey('news.id'))
+  __table_args__ = (
+    PrimaryKeyConstraint('board_id', 'news_id'),
+  )
+
 class Board(Base):
   __tablename__ = 'boards'
   id = Column(Integer, primary_key=True)
@@ -34,6 +42,7 @@ class Board(Base):
   money_scheme = Column(Integer, ForeignKey('money_schemes.id'), nullable = False)
   version = Column(Integer, nullable=False, default = 1)
   scheme = relationship('MoneyScheme', foreign_keys=[money_scheme])
+  news = relationship('News', secondary = "boardnews")
 
 class News(Base):
   __tablename__ = "news"
