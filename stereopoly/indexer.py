@@ -48,6 +48,11 @@ class Indexer(object):
 
   def index_board(self, board, session):
     changed = False
+    # checking news first
+    for n in board['news']:
+      if self.__news[n].get('changed', False):
+        changed = True
+    del board['news']
     db_board = session.query(Board).filter_by(id = board['id']).first()
     if not db_board:
       session.add(Board(**board))
