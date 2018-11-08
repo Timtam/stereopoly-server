@@ -25,7 +25,7 @@ class MoneyScheme(Base):
   @property
   def money(self):
     m = [self.money1, self.money2, self.money3, self.money4, self.money5, self.money6, self.money7, self.money8, self.money9, self.money10]
-    return tuple([c for c in m if m])
+    return tuple([c for c in m if c])
 
 class Boardnews(Base):
   __tablename__ = "boardnews"
@@ -41,8 +41,8 @@ class Board(Base):
   name = Column(Unicode, unique=True, nullable = False)
   money_scheme = Column(Integer, ForeignKey('money_schemes.id'), nullable = False)
   version = Column(Integer, nullable=False, default = 1)
-  scheme = relationship('MoneyScheme', foreign_keys=[money_scheme])
-  news = relationship('News', secondary = "boardnews")
+  scheme = relationship('MoneyScheme', backref = "boards")
+  news = relationship('News', secondary = "boardnews", backref = "boards")
 
 class News(Base):
   __tablename__ = "news"

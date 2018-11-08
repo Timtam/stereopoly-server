@@ -18,6 +18,12 @@ class Indexer(object):
 
     self.load_files()
 
+    for scheme_id in self.__money_schemes:
+      scheme = self.__money_schemes[scheme_id]
+      scheme['id'] = scheme_id
+      print("Indexing money scheme (id={0})".format(scheme_id))
+      self.index_money_scheme(scheme, session)
+
     for news_id in self.__news:
       news = self.__news[news_id]
       news['id'] = news_id
@@ -41,7 +47,25 @@ class Indexer(object):
       self.__boards = yaml_load(f, Loader=yaml_loader)
 
   def index_board(self, board, session):
-    pass
+    changed = False
+    db_board = session.query(Board).filter_by(id = board['id']).first()
+    if not db_board:
+      session.add(Board(**board))
+      print("New board added.")
+    else:
+      if db_board.name != board['name']:
+        print("Board name changed, updating.")
+        changed = True
+        db_board.name = board['name']
+      if db_board.money_scheme != board['money_scheme']:
+        print("Board money scheme changed, updating.")
+        changed = True
+        db_board.money_scheme = board['money_scheme']
+      if changed:
+        print("Changes detected, increasing version to v{0}.".format(db_board.version + 1))
+        db_board.version += 1
+      else:
+        print("No changes detected.")
 
   def index_news(self, news, session):
     changed = False
@@ -55,7 +79,16 @@ class Indexer(object):
         db_news.text = news['text']
         changed = True
       if changed:
+        news['changed'] = True
         print("News was changed, increasing version to v{0}".format(db_news.version + 1))
         db_news.version += 1
       else:
         print("No changes detected.")
+
+  def index_money_scheme(self, scheme, session):
+    db_scheme = session.query(MoneyScheme).filter_by(id = scheme['id']).first()
+    if db_scheme:
+      print("Scheme already exists, skipping.")
+      return
+    session.add(MoneyScheme(**scheme))
+    print("Money scheme added.")
