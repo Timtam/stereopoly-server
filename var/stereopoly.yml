@@ -33,13 +33,56 @@ definitions:
       error:
         type: string
         description: The error text.
+  money_scheme:
+    type: object
+    description: A money scheme used by boards
+    properties:
+      name:
+        type: string
+        description: The name (and formatting scheme) for the money scheme
+      money:
+        type: array
+        items:
+          type: integer
+  news:
+    type: object
+    description: A news representation
+    properties:
+      text:
+        type: string
+        description: News text
+      id:
+        type: integer
+        description: News ID
+      version:
+        type: integer
+        description: Current News revision
+  board:
+    type: object
+    description: representation of a playable board in stereopoly
+    properties:
+      id:
+        type: integer
+        description: the board's id
+      version:
+        type: integer
+        description: the board's current revision
+      name:
+        type: string
+        description: Name of the board
+      money_scheme:
+        $ref: '#/definitions/money_scheme'
+      news:
+        type: array
+        items:
+          $ref: '#/definitions/news'
 
 paths:
   /boards:
     parameters:
       - $ref: '#/parameters/apiVersion'
     get:
-      operationId: stereopoly.api.boards.get
+      operationId: stereopoly.api.boards.get_all
       tags:
         - "Boards"
       summary: Board structure of the Stereopoly App
@@ -57,5 +100,26 @@ paths:
                   type: integer
                 id:
                   type: integer
+        400:
+          $ref: '#/responses/error'
+  /boards/{id}:
+    parameters:
+      - $ref: '#/parameters/apiVersion'
+      - name: id
+        in: path
+        description: board id
+        required: true
+        type: integer
+    get:
+      operationId: stereopoly.api.boards.get
+      tags:
+        - "Boards"
+      summary: Board structure of the Stereopoly App
+      description: Retrieve a specific board currently in the database
+      responses:
+        200:
+          description: Successful read board operation
+          schema:
+            $ref: '#/definitions/board'
         400:
           $ref: '#/responses/error'
