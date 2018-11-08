@@ -5,7 +5,7 @@ except ImportError:
   from yaml import Loader as yaml_loader
 
 from stereopoly.config import NEWS_FILE, MONEY_SCHEMES_FILE, BOARDS_FILE
-from stereopoly.db import News, MoneyScheme, Board
+from stereopoly.db import News, MoneyScheme, Board, Boardnews
 from stereopoly import globals
 
 class Indexer(object):
@@ -50,8 +50,12 @@ class Indexer(object):
     changed = False
     # checking news first
     for n in board['news']:
-      if self.__news[n].get('changed', False):
+      conn = session.query(Boardnews).filter_by(board_id = board['id'], news_id = n).first()
+      if self.__news[n].get('changed', False) and conn:
         changed = True
+      if not conn:
+        print("Adding news (id={0}) to board (id={1}).".format(n, board['id']))
+        session.add(Boardnews(board_id = board['id'], news_id = n))
     del board['news']
     db_board = session.query(Board).filter_by(id = board['id']).first()
     if not db_board:
