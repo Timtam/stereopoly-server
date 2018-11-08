@@ -22,6 +22,9 @@ class MoneyScheme(Base):
   money9 = Column(Integer)
   money10 = Column(Integer)
 
+  def to_dict(self):
+    return dict(name = self.name, id = self.id, money = self.money)
+
   @property
   def money(self):
     m = [self.money1, self.money2, self.money3, self.money4, self.money5, self.money6, self.money7, self.money8, self.money9, self.money10]
@@ -44,11 +47,21 @@ class Board(Base):
   scheme = relationship('MoneyScheme', backref = "boards")
   news = relationship('News', secondary = "boardnews", backref = "boards")
 
+  def to_dict(self):
+    b = dict(name = self.name, id = self.id, version = self.version, news = list(), money_scheme = self.scheme.to_dict())
+    for n in self.news:
+      b['news'].append(n.to_dict())
+    return b
+
 class News(Base):
   __tablename__ = "news"
   id = Column(Integer, primary_key=True)
   text = Column(Unicode, nullable = False)
   version = Column(Integer, nullable = False, default = 1)
+
+  def to_dict(self):
+    return dict(text = self.text, id = self.id, version = self.version)
+
 
 def setup():
   global Base

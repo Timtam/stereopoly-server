@@ -1,6 +1,6 @@
 from stereopoly.db import Board
 from stereopoly import globals
-from stereopoly.utils import check_app_version
+from stereopoly.utils import check_app_version, generate_error
 
 @check_app_version
 def get_all(api):
@@ -11,4 +11,9 @@ def get_all(api):
 
 @check_app_version
 def get(api, id):
-  pass
+  session = globals.DB()
+  board = session.query(Board).filter_by(id = id).first()
+  if not board:
+    session.close()
+    return generate_error("No board found with that id"), 400
+  return board.to_dict()
