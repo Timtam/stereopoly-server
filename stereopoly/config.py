@@ -5,6 +5,7 @@ import os.path
 class Config(object):
   DEBUG = True
   CSRF_ENABLED = True
+  JSON_AS_ASCII = False
 
 BOARDS_FILE = os.path.join(get_script_directory(), 'var', 'boards.yml')
 MONEY_SCHEMES_FILE = os.path.join(get_script_directory(), 'var', 'money.yml')
