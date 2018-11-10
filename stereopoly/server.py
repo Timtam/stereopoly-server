@@ -1,6 +1,5 @@
 from flask import render_template
 import connexion
-from OpenSSL import SSL
 
 from stereopoly.config import Config
 from stereopoly import db
@@ -24,8 +23,6 @@ def setup(port, cert_file=None, private_key=None):
 
   context = None
   if cert_file and private_key:
-    context = SSL.Context(SSL.SSLv23_METHOD)
-    context.use_private_key_file(private_key)
-    context.use_certificate_file(cert_file)
+    context = (cert_file, private_key, )
 
   app.run(port=port, debug = True, ssl_context = context)
