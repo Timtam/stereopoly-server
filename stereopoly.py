@@ -20,7 +20,7 @@ runner = ArgumentParser()
 runner.execute()
 
 if runner.cmd == 'run':
-  server_setup()
+  server_setup(port=runner.port)
 elif runner.cmd == 'index':
   run_indexer()
 else:
