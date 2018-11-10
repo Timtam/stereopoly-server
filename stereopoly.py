@@ -20,7 +20,7 @@ runner = ArgumentParser()
 runner.execute()
 
 if runner.cmd == 'run':
-  server_setup(port=runner.port)
+  server_setup(port=runner.port, cert_file = runner.cert_file, private_key = runner.private_key)
 elif runner.cmd == 'index':
   run_indexer()
 else:

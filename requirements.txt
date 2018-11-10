@@ -4,3 +4,4 @@ SQLAlchemy==1.2.13
 alembic==1.0.2
 semver==2.8.1
 pyyaml
+pyopenssl==18.0.0
