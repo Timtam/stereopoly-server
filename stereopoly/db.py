@@ -56,7 +56,7 @@ class Board(Base):
       if len([f for f in fi if f[1] == 'cost']):
         cost = self.start_money * n['cost_percentage']
         mul = cost / self.scheme.money[0]
-        mul = round(mul)
+        mul = max(round(mul), 1)
         cost = self.scheme.money[0] * mul
         n['text'] = n['text'].format(cost = self.scheme.name.format(cost))
     del n['cost_percentage']
