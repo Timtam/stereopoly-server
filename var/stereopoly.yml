@@ -54,9 +54,6 @@ definitions:
       id:
         type: integer
         description: News ID
-      version:
-        type: integer
-        description: Current News revision
   board:
     type: object
     description: representation of a playable board in stereopoly

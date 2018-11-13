@@ -2,8 +2,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Unicode, Integer, func, ForeignKey, Index, collate, Boolean, UniqueConstraint
+from sqlalchemy import Column, Unicode, Integer, Float, func, ForeignKey, Index, collate, Boolean, UniqueConstraint
 from sqlalchemy import PrimaryKeyConstraint
+
+import string
 
 Base = declarative_base()
 
@@ -44,13 +46,27 @@ class Board(Base):
   name = Column(Unicode, unique=True, nullable = False)
   money_scheme = Column(Integer, ForeignKey('money_schemes.id'), nullable = False)
   version = Column(Integer, nullable=False, default = 1)
+  start_money = Column(Integer, nullable = False)
   scheme = relationship('MoneyScheme', backref = "boards")
   news = relationship('News', secondary = "boardnews", backref = "boards")
+
+  def format_news(self, n):
+    if n['cost_percentage'] > 0:
+      fi = string.Formatter().parse(n['text'])
+      if len([f for f in fi if f[1] == 'cost']):
+        cost = self.start_money * n['cost_percentage']
+        mul = cost / self.scheme.money[0]
+        mul = round(mul)
+        cost = self.scheme.money[0] * mul
+        n['text'] = n['text'].format(cost = self.scheme.name.format(cost))
+    del n['cost_percentage']
 
   def to_dict(self):
     b = dict(name = self.name, id = self.id, version = self.version, news = list(), money_scheme = self.scheme.to_dict())
     for n in self.news:
-      b['news'].append(n.to_dict())
+      nd = n.to_dict()
+      self.format_news(nd)
+      b['news'].append(nd)
     return b
 
 class News(Base):
@@ -58,10 +74,10 @@ class News(Base):
   id = Column(Integer, primary_key=True)
   text = Column(Unicode, nullable = False)
   version = Column(Integer, nullable = False, default = 1)
+  cost_percentage = Column(Float, default=0.0)
 
   def to_dict(self):
-    return dict(text = self.text, id = self.id, version = self.version)
-
+    return dict(text = self.text, id = self.id, cost_percentage = self.cost_percentage)
 
 def setup():
   global Base

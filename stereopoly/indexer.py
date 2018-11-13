@@ -91,6 +91,10 @@ class Indexer(object):
         print("Board money scheme changed, updating.")
         changed = True
         db_board.money_scheme = board['money_scheme']
+      if db_board.start_money != board['start_money']:
+        print("Board start money changed, updating.")
+        changed = True
+        db_board.start_money = board['start_money']
       if changed:
         print("Changes detected, increasing version to v{0}.".format(db_board.version + 1))
         db_board.version += 1
@@ -108,6 +112,11 @@ class Indexer(object):
         print("News text changed, updating text.")
         db_news.text = news['text']
         changed = True
+      if news.get('cost_percentage', 0.0) != db_news.cost_percentage:
+        print("News cost percentage changed, updating text.")
+        db_news.cost_percentage = news.get('cost_percentage', 0.0)
+        changed = True
+
       if changed:
         news['changed'] = True
         print("News was changed, increasing version to v{0}".format(db_news.version + 1))

@@ -11,9 +11,12 @@ def get_all(api):
 
 @check_app_version
 def get(api, id):
+  b = None
   session = globals.DB()
   board = session.query(Board).filter_by(id = id).first()
   if not board:
     session.close()
     return generate_error("No board found with that id"), 400
-  return board.to_dict()
+  b = board.to_dict()
+  session.close()
+  return b

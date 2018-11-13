@@ -17,4 +17,5 @@
 9:
   text: Test Text 9
 10:
-  text: Test Text 10
+  text: Pay {cost}
+  cost_percentage: 0.013333
