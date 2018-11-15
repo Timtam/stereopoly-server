@@ -1,5 +1,5 @@
 Flask==1.0.2
-connexion==1.5.3
+connexion[swagger-ui]==2.0.1
 SQLAlchemy==1.2.13
 alembic==1.0.2
 semver==2.8.1
