@@ -54,6 +54,14 @@ definitions:
       id:
         type: integer
         description: News ID
+  newsgroup:
+    type: object
+    description: A certain group of news
+    properties:
+      news:
+        type: array
+        items:
+          $ref: '#/definitions/news'
   board:
     type: object
     description: representation of a playable board in stereopoly
@@ -69,10 +77,10 @@ definitions:
         description: Name of the board
       money_scheme:
         $ref: '#/definitions/money_scheme'
-      news:
+      newsgroups:
         type: array
         items:
-          $ref: '#/definitions/news'
+          $ref: '#/definitions/newsgroup'
 
 paths:
   /boards:

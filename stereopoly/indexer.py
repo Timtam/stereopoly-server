@@ -4,8 +4,8 @@ try:
 except ImportError:
   from yaml import Loader as yaml_loader
 
-from stereopoly.config import NEWS_FILE, MONEY_SCHEMES_FILE, BOARDS_FILE
-from stereopoly.db import News, MoneyScheme, Board, Boardnews
+from stereopoly.config import NEWS_FILE, MONEY_SCHEMES_FILE, BOARDS_FILE, NEWSGROUPS_FILE
+from stereopoly.db import News, MoneyScheme, Board, Newsgroup, NewsgroupsNews, BoardNewsgroups
 from stereopoly import globals
 
 class Indexer(object):
@@ -13,6 +13,7 @@ class Indexer(object):
     self.__boards = dict()
     self.__money_schemes = dict()
     self.__news = dict()
+    self.__newsgroups = dict()
 
   def run(self, session):
 
@@ -42,6 +43,12 @@ class Indexer(object):
       if n.id not in self.__news:
         session.delete(n)
 
+    for newsgroup_id in self.__newsgroups:
+      newsgroup = self.__newsgroups[newsgroup_id]
+      newsgroup['id'] = newsgroup_id
+      print("Indexing newsgroup (id={0})".format(newsgroup_id))
+      self.index_newsgroup(newsgroup, session)
+
     for board_id in self.__boards:
       self.__boards[board_id]['id'] = board_id
       board = dict(self.__boards[board_id])
@@ -54,8 +61,8 @@ class Indexer(object):
       if board.id not in self.__boards:
         session.delete(board)
 
-    print("Cleaning up remaining board-news-relationships...")
-    self.clean_boardnews(session)
+    #print("Cleaning up remaining board-news-relationships...")
+    #self.clean_boardnews(session)
 
     session.commit()
 
@@ -66,18 +73,20 @@ class Indexer(object):
       self.__money_schemes = yaml_load(f, Loader=yaml_loader)
     with open(BOARDS_FILE, "r") as f:
       self.__boards = yaml_load(f, Loader=yaml_loader)
+    with open(NEWSGROUPS_FILE, "r") as f:
+      self.__newsgroups = yaml_load(f, Loader=yaml_loader)
 
   def index_board(self, board, session):
     changed = False
-    # checking news first
-    for n in board['news']:
-      conn = session.query(Boardnews).filter_by(board_id = board['id'], news_id = n).first()
-      if self.__news[n].get('changed', False) and conn:
+    # checking newsgroups first
+    for n_id in board['newsgroups']:
+      conn = session.query(BoardNewsgroups).filter_by(board_id = board['id'], newsgroup_id = n_id).first()
+      if self.__newsgroups[n_id].get('changed', False) and conn:
         changed = True
       if not conn:
-        print("Adding news (id={0}) to board (id={1}).".format(n, board['id']))
-        session.add(Boardnews(board_id = board['id'], news_id = n))
-    del board['news']
+        print("Adding newsgroup '{0}' (id={1}) to board '{2}' (id={3}).".format(self.__newsgroups[n_id]['name'], n_id, board['name'], board['id']))
+        session.add(BoardNewsgroups(board_id = board['id'], newsgroup_id = n_id))
+    del board['newsgroups']
     db_board = session.query(Board).filter_by(id = board['id']).first()
     if not db_board:
       session.add(Board(**board))
@@ -144,3 +153,23 @@ class Indexer(object):
           r = True
       if r:
         session.delete(b)
+
+  def index_newsgroup(self, newsgroup, session):
+    changed = False
+
+    for n_id in newsgroup['news']:
+      conn = session.query(NewsgroupsNews).filter_by(newsgroup_id = newsgroup['id'], news_id = n_id).first()
+      if self.__news[n_id].get('changed', False) and conn:
+        changed = True
+      if not conn:
+        print("Adding news (id={0}) to  newsgroup '{1}' (id={2}).".format(n_id, newsgroup['name'], newsgroup['id']))
+        session.add(NewsgroupsNews(newsgroup_id = newsgroup['id'], news_id = n_id))
+    del newsgroup['news']
+
+    db_newsgroup = session.query(Newsgroup).filter_by(id = newsgroup['id']).first()
+
+    if not db_newsgroup:
+      session.add(Newsgroup(**newsgroup))
+      print("New newsgroup added.")
+    else:
+      newsgroup['changed'] = changed

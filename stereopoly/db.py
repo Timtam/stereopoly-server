@@ -32,13 +32,27 @@ class MoneyScheme(Base):
     m = [self.money1, self.money2, self.money3, self.money4, self.money5, self.money6, self.money7, self.money8, self.money9, self.money10]
     return tuple([c for c in m if c])
 
-class Boardnews(Base):
-  __tablename__ = "boardnews"
-  board_id = Column(Integer, ForeignKey('boards.id'))
+class NewsgroupsNews(Base):
+  __tablename__ = "newsgroupsnews"
+  newsgroup_id = Column(Integer, ForeignKey('newsgroups.id'))
   news_id = Column(Integer, ForeignKey('news.id'))
   __table_args__ = (
-    PrimaryKeyConstraint('board_id', 'news_id'),
+    PrimaryKeyConstraint('newsgroup_id', 'news_id'),
   )
+
+class BoardNewsgroups(Base):
+  __tablename__ = "boardnewsgroups"
+  board_id = Column(Integer, ForeignKey('boards.id'))
+  newsgroup_id = Column(Integer, ForeignKey('newsgroups.id'))
+  __table_args__ = (
+    PrimaryKeyConstraint('board_id', 'newsgroup_id'),
+  )
+
+class Newsgroup(Base):
+  __tablename__ = "newsgroups"
+  id = Column(Integer, nullable = False, primary_key = True)
+  name = Column(Unicode, nullable = False)
+  news = relationship('News', secondary = "newsgroupsnews", backref = "newsgroups")
 
 class Board(Base):
   __tablename__ = 'boards'
@@ -48,7 +62,7 @@ class Board(Base):
   version = Column(Integer, nullable=False, default = 1)
   start_money = Column(Integer, nullable = False)
   scheme = relationship('MoneyScheme', backref = "boards")
-  news = relationship('News', secondary = "boardnews", backref = "boards")
+  newsgroups = relationship('Newsgroup', secondary = "boardnewsgroups", backref = "boards")
 
   def format_news(self, n):
     if n['cost_percentage'] > 0:
@@ -62,11 +76,13 @@ class Board(Base):
     del n['cost_percentage']
 
   def to_dict(self):
-    b = dict(name = self.name, id = self.id, version = self.version, news = list(), money_scheme = self.scheme.to_dict())
-    for n in self.news:
-      nd = n.to_dict()
-      self.format_news(nd)
-      b['news'].append(nd)
+    b = dict(name = self.name, id = self.id, version = self.version, newsgroups = list(), money_scheme = self.scheme.to_dict())
+    for n in self.newsgroups:
+      b['newsgroups'].append(dict(news = list()))
+      for nn in n.news:
+        nd = nn.to_dict()
+        self.format_news(nd)
+        b['newsgroups'][-1]['news'].append(nd)
     return b
 
 class News(Base):

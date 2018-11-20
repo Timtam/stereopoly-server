@@ -2,29 +2,11 @@
   name: "Classic €"
   money_scheme: 1
   start_money: 15000
-  news:
+  newsgroups:
     - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-    - 9
-    - 10
 2:
   name: "Classic DM"
   money_scheme: 2
   start_money: 30000
-  news:
+  newsgroups:
     - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-    - 9
-    - 10
