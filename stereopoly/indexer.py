@@ -25,27 +25,15 @@ class Indexer(object):
       print("Indexing money scheme (id={0})".format(scheme_id))
       self.index_money_scheme(scheme, session)
 
-    print("Cleaning up remaining money schemes...")
-    schemes = session.query(MoneyScheme).all()
-    for scheme in schemes:
-      if scheme.id not in self.__money_schemes:
-        session.delete(scheme)
-
     for news_id in self.__news:
       news = self.__news[news_id]
       news['id'] = news_id
       print("Indexing news (id={0})".format(news_id))
       self.index_news(news, session)
 
-    print("Cleaning up remaining news...")
-    news = session.query(News).all()
-    for n in news:
-      if n.id not in self.__news:
-        session.delete(n)
-
     for newsgroup_id in self.__newsgroups:
-      newsgroup = self.__newsgroups[newsgroup_id]
-      newsgroup['id'] = newsgroup_id
+      self.__newsgroups[newsgroup_id]['id'] = newsgroup_id
+      newsgroup = dict(self.__newsgroups[newsgroup_id])
       print("Indexing newsgroup (id={0})".format(newsgroup_id))
       self.index_newsgroup(newsgroup, session)
 
@@ -55,14 +43,7 @@ class Indexer(object):
       print("Indexing board '{0}' (id={1})".format(board['name'], board_id))
       self.index_board(board, session)
 
-    print("Cleaning up remaining boards...")
-    boards = session.query(Board).all()
-    for board in boards:
-      if board.id not in self.__boards:
-        session.delete(board)
-
-    #print("Cleaning up remaining board-news-relationships...")
-    #self.clean_boardnews(session)
+    self.cleanup(session)
 
     session.commit()
 
@@ -141,15 +122,25 @@ class Indexer(object):
     session.add(MoneyScheme(**scheme))
     print("Money scheme added.")
 
-  def clean_boardnews(self, session):
-    r = False
-    boardnews = session.query(Boardnews).all()
-    for b in boardnews:
+  def cleanup_relationships(self, session):
+    newsgroupsnews = session.query(NewsgroupsNews).all()
+    for n in newsgroupsnews:
+      r = False
+      if n.newsgroup_id not in self.__newsgroups:
+        r = True
+      else:
+        if n.news_id not in self.__newsgroups[n.newsgroup_id]['news']:
+          r = True
+      if r:
+        session.delete(n)
+
+    boardnewsgroups = session.query(BoardNewsgroups).all()
+    for b in boardnewsgroups:
       r = False
       if b.board_id not in self.__boards:
         r = True
       else:
-        if b.news_id not in self.__boards[b.board_id]['news']:
+        if b.newsgroup_id not in self.__boards[b.board_id]['newsgroups']:
           r = True
       if r:
         session.delete(b)
@@ -173,3 +164,31 @@ class Indexer(object):
       print("New newsgroup added.")
     else:
       newsgroup['changed'] = changed
+      
+  def cleanup(self, session):
+    print("Cleaning up remaining money schemes...")
+    schemes = session.query(MoneyScheme).all()
+    for scheme in schemes:
+      if scheme.id not in self.__money_schemes:
+        session.delete(scheme)
+
+    print("Cleaning up remaining news...")
+    news = session.query(News).all()
+    for n in news:
+      if n.id not in self.__news:
+        session.delete(n)
+
+    print("Cleaning up remaining newsgroups...")
+    newsgroups = session.query(Newsgroup).all()
+    for ng in newsgroups:
+      if ng.id not in self.__newsgroups:
+        session.delete(ng)
+
+    print("Cleaning up remaining boards...")
+    boards = session.query(Board).all()
+    for board in boards:
+      if board.id not in self.__boards:
+        session.delete(board)
+
+    print("Cleaning up remaining relationship tables...")
+    self.cleanup_relationships(session)
