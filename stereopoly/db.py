@@ -93,7 +93,7 @@ class News(Base):
   cost_percentage = Column(Float, default=0.0)
 
   def to_dict(self):
-    return dict(text = self.text, id = self.id, cost_percentage = self.cost_percentage)
+    return dict(text = self.text, cost_percentage = self.cost_percentage)
 
 def setup():
   global Base

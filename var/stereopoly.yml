@@ -51,9 +51,6 @@ definitions:
       text:
         type: string
         description: News text
-      id:
-        type: integer
-        description: News ID
   newsgroup:
     type: object
     description: A certain group of news
