@@ -63,6 +63,8 @@ class Board(Base):
   start_money = Column(Integer, nullable = False)
   scheme = relationship('MoneyScheme', backref = "boards")
   newsgroups = relationship('Newsgroup', secondary = "boardnewsgroups", backref = "boards")
+  chance_cards = relationship('ChanceCard', secondary = "boardchancecards", backref = "boards")
+  community_chest_cards = relationship('CommunityChestCard', secondary = "boardcommunitychestcards", backref = "boards")
 
   def format_news(self, n):
     if n['cost_percentage'] > 0:
@@ -94,6 +96,42 @@ class News(Base):
 
   def to_dict(self):
     return dict(text = self.text, cost_percentage = self.cost_percentage)
+
+class ChanceCard(Base):
+  __tablename__ = "chance_cards"
+  id = Column(Integer, primary_key=True)
+  text = Column(Unicode, nullable = False)
+  version = Column(Integer, nullable = False, default = 1)
+  cost_percentage = Column(Float, default=0.0)
+
+  def to_dict(self):
+    return dict(text = self.text, cost_percentage = self.cost_percentage)
+
+class CommunityChestCard(Base):
+  __tablename__ = "community_chest_cards"
+  id = Column(Integer, primary_key=True)
+  text = Column(Unicode, nullable = False)
+  version = Column(Integer, nullable = False, default = 1)
+  cost_percentage = Column(Float, default=0.0)
+
+  def to_dict(self):
+    return dict(text = self.text, cost_percentage = self.cost_percentage)
+
+class BoardChanceCards(Base):
+  __tablename__ = "boardchancecards"
+  board_id = Column(Integer, ForeignKey('boards.id'))
+  chance_card_id = Column(Integer, ForeignKey('chance_cards.id'))
+  __table_args__ = (
+    PrimaryKeyConstraint('board_id', 'chance_card_id'),
+  )
+
+class BoardCommunityChestCards(Base):
+  __tablename__ = "boardcommunitychestcards"
+  board_id = Column(Integer, ForeignKey('boards.id'))
+  community_chest_card_id = Column(Integer, ForeignKey('community_chest_cards.id'))
+  __table_args__ = (
+    PrimaryKeyConstraint('board_id', 'community_chest_card_id'),
+  )
 
 def setup():
   global Base
