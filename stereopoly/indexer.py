@@ -189,6 +189,28 @@ class Indexer(object):
       if r:
         session.delete(b)
 
+    boardchancecards = session.query(BoardChanceCards).all()
+    for b in boardchancecards:
+      r = False
+      if b.board_id not in self.__boards:
+        r = True
+      else:
+        if b.chance_card_id not in self.__boards[b.board_id]['chance_cards']:
+          r = True
+      if r:
+        session.delete(b)
+
+    boardcommunitychestcards = session.query(BoardCommunityChestCards).all()
+    for b in boardcommunitychestcards:
+      r = False
+      if b.board_id not in self.__boards:
+        r = True
+      else:
+        if b.community_chest_card_id not in self.__boards[b.board_id]['community_chest_cards']:
+          r = True
+      if r:
+        session.delete(b)
+
   def index_newsgroup(self, newsgroup, session):
     changed = False
 
@@ -221,6 +243,18 @@ class Indexer(object):
     for n in news:
       if n.id not in self.__news:
         session.delete(n)
+
+    print("Cleaning up remaining chance cards...")
+    cards = session.query(ChanceCard).all()
+    for c in cards:
+      if c.id not in self.__chance_cards:
+        session.delete(c)
+
+    print("Cleaning up remaining community chest cards...")
+    cards = session.query(CommunityChestCard).all()
+    for c in cards:
+      if c.id not in self.__community_chest_cards:
+        session.delete(c)
 
     print("Cleaning up remaining newsgroups...")
     newsgroups = session.query(Newsgroup).all()
