@@ -4,9 +4,33 @@
   start_money: 15000
   newsgroups:
     - 1
+  chance_cards:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+  community_chest_cards:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
 2:
   name: "Classic DM"
   money_scheme: 2
   start_money: 30000
   newsgroups:
     - 1
+  chance_cards:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+  community_chest_cards:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5

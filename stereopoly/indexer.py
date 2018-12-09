@@ -4,13 +4,15 @@ try:
 except ImportError:
   from yaml import Loader as yaml_loader
 
-from stereopoly.config import NEWS_FILE, MONEY_SCHEMES_FILE, BOARDS_FILE, NEWSGROUPS_FILE
-from stereopoly.db import News, MoneyScheme, Board, Newsgroup, NewsgroupsNews, BoardNewsgroups
+from stereopoly.config import CHANCE_CARDS_FILE, COMMUNITY_CHEST_CARDS_FILE, NEWS_FILE, MONEY_SCHEMES_FILE, BOARDS_FILE, NEWSGROUPS_FILE
+from stereopoly.db import News, MoneyScheme, Board, Newsgroup, NewsgroupsNews, BoardNewsgroups, BoardChanceCards, BoardCommunityChestCards, ChanceCard, CommunityChestCard
 from stereopoly import globals
 
 class Indexer(object):
   def __init__(self):
     self.__boards = dict()
+    self.__chance_cards = dict()
+    self.__community_chest_cards = dict()
     self.__money_schemes = dict()
     self.__news = dict()
     self.__newsgroups = dict()
@@ -31,6 +33,18 @@ class Indexer(object):
       print("Indexing news (id={0})".format(news_id))
       self.index_news(news, session)
 
+    for chance_id in self.__chance_cards:
+      card = self.__chance_cards[chance_id]
+      card['id'] = chance_id
+      print("Indexing chance card (id={0})".format(chance_id))
+      self.index_chance_card(card, session)
+
+    for community_id in self.__community_chest_cards:
+      card = self.__community_chest_cards[community_id]
+      card['id'] = community_id
+      print("Indexing community chest card (id={0})".format(community_id))
+      self.index_community_chest_card(card, session)
+
     for newsgroup_id in self.__newsgroups:
       self.__newsgroups[newsgroup_id]['id'] = newsgroup_id
       newsgroup = dict(self.__newsgroups[newsgroup_id])
@@ -48,6 +62,10 @@ class Indexer(object):
     session.commit()
 
   def load_files(self):
+    with open(CHANCE_CARDS_FILE, "r") as f:
+      self.__chance_cards = yaml_load(f, Loader=yaml_loader)
+    with open(COMMUNITY_CHEST_CARDS_FILE, "r") as f:
+      self.__community_chest_cards = yaml_load(f, Loader=yaml_loader)
     with open(NEWS_FILE, "r") as f:
       self.__news = yaml_load(f, Loader=yaml_loader)
     with open(MONEY_SCHEMES_FILE, "r") as f:
@@ -62,12 +80,38 @@ class Indexer(object):
     # checking newsgroups first
     for n_id in board['newsgroups']:
       conn = session.query(BoardNewsgroups).filter_by(board_id = board['id'], newsgroup_id = n_id).first()
-      if self.__newsgroups[n_id].get('changed', False) and conn:
-        changed = True
+      if not self.__newsgroups[n_id].get('changed', False) and conn:
+        continue
+      changed = True
       if not conn:
         print("Adding newsgroup '{0}' (id={1}) to board '{2}' (id={3}).".format(self.__newsgroups[n_id]['name'], n_id, board['name'], board['id']))
         session.add(BoardNewsgroups(board_id = board['id'], newsgroup_id = n_id))
     del board['newsgroups']
+
+    # checking chance cards
+
+    for c_id in board['chance_cards']:
+      conn = session.query(BoardChanceCards).filter_by(board_id = board['id'], chance_card_id = c_id).first()
+      if not self.__chance_cards[c_id].get('changed', False) and conn:
+        continue
+      changed = True
+      if not conn:
+        print("Adding chance card (id={0}) to board '{1}' (id={2}).".format(c_id, board['name'], board['id']))
+        session.add(BoardChanceCards(board_id = board['id'], chance_card_id = c_id))
+    del board['chance_cards']
+
+    # checking community chest cards
+
+    for c_id in board['community_chest_cards']:
+      conn = session.query(BoardCommunityChestCards).filter_by(board_id = board['id'], community_chest_card_id = c_id).first()
+      if not self.__community_chest_cards[c_id].get('changed', False) and conn:
+        continue
+      changed = True
+      if not conn:
+        print("Adding community chest card (id={0}) to board '{1}' (id={2}).".format(c_id, board['name'], board['id']))
+        session.add(BoardCommunityChestCards(board_id = board['id'], community_chest_card_id = c_id))
+    del board['community_chest_cards']
+
     db_board = session.query(Board).filter_by(id = board['id']).first()
     if not db_board:
       session.add(Board(**board))
@@ -99,11 +143,11 @@ class Indexer(object):
       print("New news added.")
     else:
       if news['text'] != db_news.text:
-        print("News text changed, updating text.")
+        print("News text changed, updating...")
         db_news.text = news['text']
         changed = True
       if news.get('cost_percentage', 0.0) != db_news.cost_percentage:
-        print("News cost percentage changed, updating text.")
+        print("News cost percentage changed, updating...")
         db_news.cost_percentage = news.get('cost_percentage', 0.0)
         changed = True
 
@@ -192,3 +236,49 @@ class Indexer(object):
 
     print("Cleaning up remaining relationship tables...")
     self.cleanup_relationships(session)
+
+  def index_chance_card(self, card, session):
+    changed = False
+    db_card = session.query(ChanceCard).filter_by(id = card['id']).first()
+    if not db_card:
+      session.add(ChanceCard(**card))
+      print("New chance card added.")
+    else:
+      if card['text'] != db_card.text:
+        print("Chance card text changed, updating...")
+        db_card.text = card['text']
+        changed = True
+      if card.get('cost_percentage', 0.0) != db_card.cost_percentage:
+        print("Chance card cost percentage changed, updating...")
+        db_card.cost_percentage = card.get('cost_percentage', 0.0)
+        changed = True
+
+      if changed:
+        card['changed'] = True
+        print("Chance card was changed, increasing version to v{0}".format(db_card.version + 1))
+        db_card.version += 1
+      else:
+        print("No changes detected.")
+
+  def index_community_chest_card(self, card, session):
+    changed = False
+    db_card = session.query(CommunityChestCard).filter_by(id = card['id']).first()
+    if not db_card:
+      session.add(CommunityChestCard(**card))
+      print("New community chest card added.")
+    else:
+      if card['text'] != db_card.text:
+        print("Community chest card text changed, updating...")
+        db_card.text = card['text']
+        changed = True
+      if card.get('cost_percentage', 0.0) != db_card.cost_percentage:
+        print("Community chest card cost percentage changed, updating...")
+        db_card.cost_percentage = card.get('cost_percentage', 0.0)
+        changed = True
+
+      if changed:
+        card['changed'] = True
+        print("Community chest card was changed, increasing version to v{0}".format(db_card.version + 1))
+        db_card.version += 1
+      else:
+        print("No changes detected.")
