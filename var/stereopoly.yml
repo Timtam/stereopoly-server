@@ -51,6 +51,20 @@ definitions:
       text:
         type: string
         description: News text
+  chance_card:
+    type: object
+    description: A chance card representation
+    properties:
+      text:
+        type: string
+        description: Chance card text
+  community_chest_card:
+    type: object
+    description: A Community Chest card representation.
+    properties:
+      text:
+        type: string
+        description: Community Chest card text
   newsgroup:
     type: object
     description: A certain group of news
@@ -78,6 +92,14 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/newsgroup'
+      chance_cards:
+        type: array
+        items:
+          $ref: '#/definitions/chance_card'
+      community_chest_cards:
+        type: array
+        items:
+          $ref: '#/definitions/community_chest_card'
 
 paths:
   /boards:
