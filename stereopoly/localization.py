@@ -76,7 +76,7 @@ def add_new_language(lang):
     langs = dict()
     for l in globals.LANGUAGES[1:]:
       langs[l.id] = l.name
-    data = yaml_dump(langs, Dumper = yaml_dumper)
+    data = yaml_dump(langs, Dumper = yaml_dumper, default_flow_style = False)
     with open(os.path.join(get_script_directory(), 'var', 'languages.yml'), 'w') as f:
       f.write(data)
 
