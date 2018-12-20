@@ -3,7 +3,10 @@
 from stereopoly.argument_parser import ArgumentParser
 from stereopoly.db import setup as db_setup
 from stereopoly.indexer import Indexer
+from stereopoly import localization
 from stereopoly.server import setup as server_setup
+
+import sys
 
 def run_indexer():
   # we need an initialized database
@@ -19,12 +22,14 @@ def run_indexer():
 runner = ArgumentParser()
 runner.execute()
 
-if runner.cmd == 'run':
-  server_setup(port=runner.port, cert_file = runner.cert_file, private_key = runner.private_key)
-elif runner.cmd == 'index':
+if runner.run:
+  localization.load_languages()
+  server_setup(port=runner.port, cert_file = runner.certificate_file, private_key = runner.private_key)
+elif runner.index:
   run_indexer()
-else:
-  print('Invalid command.')
-  print('Supported commands:')
-  print('\tindex - (re)index all news, boards etc.')
-  print('\trun - run the server')
+elif runner.add_language:
+  localization.load_languages()
+  if localization.language_exists(runner.language):
+    print("A language with this name already exists.")
+    sys.exit(1)
+  localization.add_new_language(runner.language)
