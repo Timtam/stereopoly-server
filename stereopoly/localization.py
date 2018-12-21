@@ -13,6 +13,8 @@ import gettext
 import natsort
 import os
 import os.path
+import pycountry
+import sys
 from yaml import load as yaml_load
 from yaml import dump as yaml_dump
 try:
@@ -23,16 +25,26 @@ except ImportError:
   from yaml import Dumper as yaml_dumper
 
 class Language(object):
+  code = ''
   id = 0
   name = ''
 
-  def __init__(self, id = 0, name = 'English'):
+  def __init__(self, id = 0, name = 'English', code = 'en'):
     self.id = id
-    self.name = name
+    if code and not name:
+      self.name = pycountry.languages.get(alpha_2 = code).name
+      self.code = code
+    elif name and not code:
+      self.code = pycountry.languages.get(name = self.name).alpha_2
+    elif not name and not code:
+      raise ValueError('Either name or code must be provided')
+    else:
+      self.name = name
+      self.code = code
 
   @property
   def folder(self):
-    return os.path.join(get_script_directory(), 'locale', self.name.lower())
+    return os.path.join(get_script_directory(), 'locale', self.code)
 
   @property
   def po_file(self):
@@ -43,7 +55,7 @@ class Language(object):
     return os.path.join(self.folder, 'LC_MESSAGES', 'stereopoly.mo')
 
   def to_dict(self):
-    return dict(id = self.id, name = self.name)
+    return dict(id = self.id, name = self.name, code = self.code)
 
 def get_message_catalog():
   cat = catalog.Catalog(fuzzy = False, charset = 'utf-8')
@@ -76,14 +88,15 @@ def get_message_catalog():
 
   return cat
 
-def _(string, lang = None):
-  if lang is None:
+def _(string, lang = 0):
+  olang = find_language(lang)
+  if not olang:
     return gettext.NullTranslations().gettext(string)
   else:
     return gettext.translation(
       'stereopoly',
-      'locale',
-      languages = [lang],
+      os.path.join(get_script_directory(), 'locale'),
+      languages = [olang.code],
       fallback = True
     ).gettext(string)
     
@@ -94,15 +107,35 @@ def load_languages():
       langs = yaml_load(f, Loader = yaml_loader)
       for id in langs.keys():
         l = langs[id]
-        globals.LANGUAGES.append(Language(id, l))
+        globals.LANGUAGES.append(Language(id = id, name = l['name'], code = l['code']))
+  # injecting into global namespace
+  sys.modules['builtins'].__dict__['_'] = _
 
 def add_new_language(lang):
-  lang = lang[0].upper() + lang[1:].lower()
+  langname = ''
+  langcode = ''
+  if not lang.isalpha():
+    print("Language may only be alphabetic.")
+    return
+  if len(lang) == 2:
+    print("Got two-letter alphabetic name, expecting to be language code")
+    lang = pycountry.languages.get(alpha_2 = lang)
+    if not lang:
+      print("No language found with that code.")
+      return
+  else:
+    print("Language is longer than two signs, therefore seems to be fully qualified language")
+    lang = pycountry.languages.get(name = lang)
+    if not lang:
+      print("No language found with that name")
+      return
+  langname = lang.name
+  langcode = lang.alpha_2
   new_id = natsort.natsorted(globals.LANGUAGES, key = lambda l: l.id)[-1].id + 1
   
-  print("Creating language with id {0}".format(new_id))
+  print("Creating language {0} ({1}) with id {2}".format(langname, langcode, new_id))
 
-  globals.LANGUAGES.append(Language(new_id, lang))
+  globals.LANGUAGES.append(Language(id = new_id, name = langname, code = langcode))
 
   # creating folder structure
   lc_folder = os.path.join(globals.LANGUAGES[-1].folder, 'LC_MESSAGES')
@@ -126,20 +159,29 @@ def add_new_language(lang):
 
   langs = dict()
   for l in globals.LANGUAGES[1:]:
-    langs[l.id] = l.name
+    d = l.to_dict()
+    langs[d['id']] = d
+    del d['id']
   data = yaml_dump(langs, Dumper = yaml_dumper, default_flow_style = False)
   with open(LANGUAGES_FILE, 'w') as f:
     f.write(data)
 
   print("Done.")
 
+def find_language(lang):
+  for l in globals.LANGUAGES[1:]:
+    if (isinstance(lang, int) and l.id == lang) or \
+       (not isinstance(lang, int) and l.name.lower() == lang.lower() or l.code.lower() == lang.lower()):
+      return l
+  return None
+
 def language_exists(lang):
-  return lang in [l.name.lower() for l in globals.LANGUAGES]
+  return find_language(lang) is not None
 
 def update_language(lang):
 
-  olang = [l for l in globals.LANGUAGES if l.name.lower() == lang][0]
-  print("Updating language {0}".format(olang.name))
+  olang = find_language(lang)
+  print("Updating language {0} ({1})".format(olang.name, olang.code))
 
   print("Retrieving message catalog...")
   
@@ -162,13 +204,11 @@ def update_language(lang):
 
 def compile_message_catalog(lang):
 
-  langlist = [l for l in globals.LANGUAGES[1:] if l.name.lower() == lang]
+  olang = find_language(lang)
 
-  if len(langlist) == 0:
+  if not olang:
     print("No language with that name found.")
     return
-
-  olang = langlist[0]
 
   if not os.path.exists(olang.po_file):
     print("No po file found for language {0}".format(olang.name))

@@ -18,6 +18,13 @@ parameters:
     description: API version used
     required: false
     default: "1.0.0"
+  language:
+    in: query
+    name: language
+    type: integer
+    description: language id for result
+    required: false
+    default: 0
 
 responses:
   error:
@@ -105,6 +112,7 @@ paths:
   /boards:
     parameters:
       - $ref: '#/parameters/apiVersion'
+      - $ref: '#/parameters/language'
     get:
       operationId: stereopoly.api.boards.get_all
       tags:
@@ -129,6 +137,7 @@ paths:
   /boards/{id}:
     parameters:
       - $ref: '#/parameters/apiVersion'
+      - $ref: '#/parameters/language'
       - name: id
         in: path
         description: board id

@@ -6,3 +6,4 @@ semver==2.8.1
 pyyaml
 babel==2.6.0
 natsort==5.1.0
+pycountry==18.12.8
