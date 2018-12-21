@@ -10,6 +10,7 @@ class Config(object):
 BOARDS_FILE = os.path.join(get_script_directory(), 'var', 'boards.yml')
 CHANCE_CARDS_FILE = os.path.join(get_script_directory(), 'var', 'chance_cards.yml')
 COMMUNITY_CHEST_CARDS_FILE = os.path.join(get_script_directory(), 'var', 'community_chest_cards.yml')
+LANGUAGES_FILE = os.path.join(get_script_directory(), 'var', 'languages.yml')
 MONEY_SCHEMES_FILE = os.path.join(get_script_directory(), "var", "money.yml")
 NEWS_FILE = os.path.join(get_script_directory(), "var", "news.yml")
 NEWSGROUPS_FILE = os.path.join(get_script_directory(), "var", "newsgroups.yml")

@@ -1,4 +1,5 @@
 from stereopoly import globals
+from stereopoly.config import LANGUAGES_FILE
 from stereopoly.path import get_script_directory
 
 from babel.messages import (
@@ -34,7 +35,7 @@ class Language(object):
   def to_dict(self):
     return dict(id = self.id, name = self.name)
 
-def get_translation_catalog():
+def get_message_catalog():
   cat = catalog.Catalog(fuzzy = False, charset = 'utf-8')
   # we need to retrieve all translatable strings within the source
   tokens = extract.extract_from_dir(
@@ -63,8 +64,8 @@ def _(string, lang = None):
     
 def load_languages():
   globals.LANGUAGES.append(Language())
-  if os.path.exists(os.path.join(get_script_directory(), 'var', 'languages.yml')):
-    with open(os.path.join(get_script_directory(), 'var', 'languages.yml'), 'r') as f:
+  if os.path.exists(LANGUAGES_FILE):
+    with open(LANGUAGES_FILE, 'r') as f:
       langs = yaml_load(f, Loader = yaml_loader)
       for id in langs.keys():
         l = langs[id]
@@ -74,22 +75,39 @@ def add_new_language(lang):
   lang = lang[0].upper() + lang[1:].lower()
   new_id = natsort.natsorted(globals.LANGUAGES, key = lambda l: l.id)[-1].id + 1
   
+  print("Creating language with id {0}".format(new_id))
+
   globals.LANGUAGES.append(Language(new_id, lang))
 
   # creating folder structure
-  os.makedirs(os.path.join(globals.LANGUAGES[-1].folder, 'LC_MESSAGES'), exist_ok=True)
+  lc_folder = os.path.join(globals.LANGUAGES[-1].folder, 'LC_MESSAGES')
+  if os.path.exists(lc_folder):
+    print("Folder {0} already exists".format(lc_folder))
+  else:
+    print("Creating folder {0}".format(lc_folder))
+    os.makedirs(lc_folder)
 
-  cat = get_translation_catalog()
+  print("Retrieving message catalog...")
 
-  with open(os.path.join(globals.LANGUAGES[-1].folder, 'LC_MESSAGES', 'stereopoly.po'), 'wb') as f:
+  cat = get_message_catalog()
+
+  po_file = os.path.join(lc_folder, 'stereopoly.po')
+  print("Writing file {0}".format(po_file))
+
+  with open(po_file, 'wb') as f:
     pofile.write_po(f, cat)
+
+  
+  print("Writing file {0}".format(LANGUAGES_FILE))
 
   langs = dict()
   for l in globals.LANGUAGES[1:]:
     langs[l.id] = l.name
   data = yaml_dump(langs, Dumper = yaml_dumper, default_flow_style = False)
-  with open(os.path.join(get_script_directory(), 'var', 'languages.yml'), 'w') as f:
+  with open(LANGUAGES_FILE, 'w') as f:
     f.write(data)
+
+  print("Done.")
 
 def language_exists(lang):
   return lang in [l.name.lower() for l in globals.LANGUAGES]
