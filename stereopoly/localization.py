@@ -64,10 +64,12 @@ def load_languages():
   if os.path.exists(os.path.join(get_script_directory(), 'var', 'languages.yml')):
     with open(os.path.join(get_script_directory(), 'var', 'languages.yml'), 'r') as f:
       langs = yaml_load(f, Loader = yaml_loader)
-      for id, l in langs:
+      for id in langs.keys():
+        l = langs[id]
         globals.LANGUAGES.append(Language(id, l))
 
 def add_new_language(lang):
+  lang = lang[0].upper() + lang[1:].lower()
   new_id = natsort.natsorted(globals.LANGUAGES, key = lambda l: l.id)[-1].id + 1
   
   globals.LANGUAGES.append(Language(new_id, lang))
