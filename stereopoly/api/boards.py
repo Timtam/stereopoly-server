@@ -17,6 +17,6 @@ def get(api, id, language):
   if not board:
     session.close()
     return generate_error(_("No board found with that id", language)), 400
-  b = board.to_dict()
+  b = board.to_dict(language)
   session.close()
   return b

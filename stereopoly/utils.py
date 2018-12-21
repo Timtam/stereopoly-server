@@ -9,8 +9,8 @@ def check_app_version(f):
   def checker(api, **kwargs):
     try:
       if semver.compare(SUPPORTED_APP_VERSION, api) > 0:
-        return generate_error('Unsupported app version'), 400
+        return generate_error(_('Unsupported app version')), 400
     except ValueError:
-      return generate_error('Error parsing app version'), 400
+      return generate_error(_('Error parsing app version')), 400
     return f(api=api, **kwargs)
   return checker

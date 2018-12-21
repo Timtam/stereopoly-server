@@ -24,8 +24,8 @@ class MoneyScheme(Base):
   money9 = Column(Integer)
   money10 = Column(Integer)
 
-  def to_dict(self):
-    return dict(name = self.name, money = self.money)
+  def to_dict(self, lang = 0):
+    return dict(name = _(self.name, lang), money = self.money)
 
   def get_translatables(self):
     return [dict(
@@ -74,7 +74,7 @@ class Board(Base):
   chance_cards = relationship('ChanceCard', secondary = "boardchancecards", backref = "boards")
   community_chest_cards = relationship('CommunityChestCard', secondary = "boardcommunitychestcards", backref = "boards")
 
-  def format_cost_percentage(self, o):
+  def format_cost_percentage(self, o, lang = 0):
     if o['cost_percentage'] > 0:
       fi = string.Formatter().parse(o['text'])
       if len([f for f in fi if f[1] == 'cost']):
@@ -82,26 +82,26 @@ class Board(Base):
         mul = cost / self.scheme.money[0]
         mul = max(round(mul), 1)
         cost = self.scheme.money[0] * mul
-        o['text'] = o['text'].format(cost = self.scheme.name.format(cost))
+        o['text'] = o['text'].format(cost = _(self.scheme.name, lang).format(cost))
     del o['cost_percentage']
 
-  def to_dict(self):
-    b = dict(name = self.name, id = self.id, version = self.version, newsgroups = list(), money_scheme = self.scheme.to_dict(), chance_cards = list(), community_chest_cards = list())
+  def to_dict(self, lang = 0):
+    b = dict(name = _(self.name, lang), id = self.id, version = self.version, newsgroups = list(), money_scheme = self.scheme.to_dict(lang), chance_cards = list(), community_chest_cards = list())
     for n in self.newsgroups:
       b['newsgroups'].append(dict(news = list()))
       for nn in n.news:
-        nd = nn.to_dict()
-        self.format_cost_percentage(nd)
+        nd = nn.to_dict(lang)
+        self.format_cost_percentage(nd, lang)
         b['newsgroups'][-1]['news'].append(nd)
 
     for c in self.chance_cards:
-      oc = c.to_dict()
-      self.format_cost_percentage(oc)
+      oc = c.to_dict(lang)
+      self.format_cost_percentage(oc, lang)
       b['chance_cards'].append(oc)
 
     for c in self.community_chest_cards:
-      oc = c.to_dict()
-      self.format_cost_percentage(oc)
+      oc = c.to_dict(lang)
+      self.format_cost_percentage(oc, lang)
       b['community_chest_cards'].append(oc)
 
     return b
@@ -133,8 +133,8 @@ class News(Base):
   version = Column(Integer, nullable = False, default = 1)
   cost_percentage = Column(Float, default=0.0)
 
-  def to_dict(self):
-    return dict(text = self.text, cost_percentage = self.cost_percentage)
+  def to_dict(self, lang = 0):
+    return dict(text = _(self.text, lang), cost_percentage = self.cost_percentage)
 
   def get_translatables(self):
     return [dict(
@@ -151,8 +151,8 @@ class ChanceCard(Base):
   version = Column(Integer, nullable = False, default = 1)
   cost_percentage = Column(Float, default=0.0)
 
-  def to_dict(self):
-    return dict(text = self.text, cost_percentage = self.cost_percentage)
+  def to_dict(self, lang = 0):
+    return dict(text = _(self.text, lang), cost_percentage = self.cost_percentage)
 
   def get_translatables(self):
     return [dict(
@@ -169,8 +169,8 @@ class CommunityChestCard(Base):
   version = Column(Integer, nullable = False, default = 1)
   cost_percentage = Column(Float, default=0.0)
 
-  def to_dict(self):
-    return dict(text = self.text, cost_percentage = self.cost_percentage)
+  def to_dict(self, lang = 0):
+    return dict(text = _(self.text, lang), cost_percentage = self.cost_percentage)
 
   def get_translatables(self):
     return [dict(
