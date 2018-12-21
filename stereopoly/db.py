@@ -27,6 +27,14 @@ class MoneyScheme(Base):
   def to_dict(self):
     return dict(name = self.name, money = self.money)
 
+  def get_translatables(self):
+    return [dict(
+      id = self.name,
+      user_comments = (
+        'name for money scheme {0}'.format(self.id),
+      )
+    )]
+
   @property
   def money(self):
     m = [self.money1, self.money2, self.money3, self.money4, self.money5, self.money6, self.money7, self.money8, self.money9, self.money10]
@@ -98,6 +106,26 @@ class Board(Base):
 
     return b
 
+  def get_translatables(self):
+    translatables = list()
+    translatables.append(dict(
+      id = self.name,
+      user_comments = (
+        'name of board {0}'.format(self.id),
+      )
+    ))
+
+    for ng in self.newsgroups:
+      for n in ng.news:
+        translatables += n.get_translatables()
+        
+    for c in self.chance_cards:
+      translatables += c.get_translatables()
+    for c in self.community_chest_cards:
+      translatables += c.get_translatables()
+    translatables += self.scheme.get_translatables()
+    return translatables
+
 class News(Base):
   __tablename__ = "news"
   id = Column(Integer, primary_key=True)
@@ -107,6 +135,14 @@ class News(Base):
 
   def to_dict(self):
     return dict(text = self.text, cost_percentage = self.cost_percentage)
+
+  def get_translatables(self):
+    return [dict(
+      id = self.text,
+      user_comments = (
+        'text of news {0}'.format(self.id),
+      )
+    )]
 
 class ChanceCard(Base):
   __tablename__ = "chance_cards"
@@ -118,6 +154,14 @@ class ChanceCard(Base):
   def to_dict(self):
     return dict(text = self.text, cost_percentage = self.cost_percentage)
 
+  def get_translatables(self):
+    return [dict(
+      id = self.text,
+      user_comments = (
+        'text of chance card {0}'.format(self.id),
+      )
+    )]
+
 class CommunityChestCard(Base):
   __tablename__ = "community_chest_cards"
   id = Column(Integer, primary_key=True)
@@ -127,6 +171,14 @@ class CommunityChestCard(Base):
 
   def to_dict(self):
     return dict(text = self.text, cost_percentage = self.cost_percentage)
+
+  def get_translatables(self):
+    return [dict(
+      id = self.text,
+      user_comments = (
+        'text of community chest card {0}'.format(self.id),
+      )
+    )]
 
 class BoardChanceCards(Base):
   __tablename__ = "boardchancecards"

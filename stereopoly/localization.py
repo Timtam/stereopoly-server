@@ -1,5 +1,6 @@
 from stereopoly import globals
 from stereopoly.config import LANGUAGES_FILE
+from stereopoly import db
 from stereopoly.path import get_script_directory
 
 from babel.messages import (
@@ -38,6 +39,7 @@ class Language(object):
 def get_message_catalog():
   cat = catalog.Catalog(fuzzy = False, charset = 'utf-8')
   # we need to retrieve all translatable strings within the source
+  print("Parsing source for translatable strings...")
   tokens = extract.extract_from_dir(
     dirname = os.path.join(get_script_directory(), 'stereopoly'),
   )
@@ -49,6 +51,20 @@ def get_message_catalog():
       user_comments = token[3],
       context = token[4]
     )
+
+  print("Getting translatable strings from database...")
+
+  session = db.setup()()
+  boards = session.query(db.Board).all()
+
+  for b in boards:
+    for t in b.get_translatables():
+      cat.add(
+        t['id'],
+        user_comments = t['user_comments']
+      )
+  session.close()
+
   return cat
 
 def _(string, lang = None):
