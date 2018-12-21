@@ -6,6 +6,7 @@ from stereopoly.path import get_script_directory
 from babel.messages import (
   catalog,
   extract,
+  mofile,
   pofile
 )
 import gettext
@@ -37,6 +38,10 @@ class Language(object):
   def po_file(self):
     return os.path.join(self.folder, 'LC_MESSAGES', 'stereopoly.po')
 
+  @property
+  def mo_file(self):
+    return os.path.join(self.folder, 'LC_MESSAGES', 'stereopoly.mo')
+
   def to_dict(self):
     return dict(id = self.id, name = self.name)
 
@@ -51,7 +56,7 @@ def get_message_catalog():
   for token in tokens:
     cat.add(
       token[2],
-      locations = (token[0], token[1], ),
+      #locations = (token[0], token[1], ), # currently bricks with 2.6.0
       user_comments = token[3],
       context = token[4]
     )
@@ -153,4 +158,29 @@ def update_language(lang):
   with open(olang.po_file, 'wb') as f:
     pofile.write_po(f, cat)
 
+  print("Done.")
+
+def compile_message_catalog(lang):
+
+  langlist = [l for l in globals.LANGUAGES[1:] if l.name.lower() == lang]
+
+  if len(langlist) == 0:
+    print("No language with that name found.")
+    return
+
+  olang = langlist[0]
+
+  if not os.path.exists(olang.po_file):
+    print("No po file found for language {0}".format(olang.name))
+    return
+
+  print("Compiling catalog for language {0}".format(olang.name))
+
+  print("Reading file {0}".format(olang.po_file))
+  with open(olang.po_file, 'r') as f:
+    cat = pofile.read_po(f)
+
+  print("Writing file {0}".format(olang.mo_file))
+  with open(olang.mo_file, 'wb') as f:
+    mofile.write_mo(f, cat)
   print("Done.")

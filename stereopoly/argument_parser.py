@@ -5,6 +5,7 @@ class ArgumentParser(object):
 
   add_language = False
   certificate_file = None
+  compile_language = False
   index = False
   language = ''
   port = 5000
@@ -37,6 +38,13 @@ class ArgumentParser(object):
       type=str,
       help='name of the language which will be added'
     )
+    language_compile_parser = language_subparsers.add_parser('compile',
+      help='compile mo file from an existing language\'s po file'
+    )
+    language_compile_parser.add_argument('lang',
+      type=str,
+      help='name of the language which will be compiled (all to compile all languages)'
+    )
     language_update_parser = language_subparsers.add_parser('update',
       help='update po catalog for specific language'
     )
@@ -65,6 +73,9 @@ class ArgumentParser(object):
         self.language = args.lang.lower()
       elif args.language_subparser_name == 'update':
         self.update_language = True
+        self.language = args.lang.lower()
+      elif args.language_subparser_name == 'compile':
+        self.compile_language = True
         self.language = args.lang.lower()
       else:
         self.parser.parse_args(['language', '--help'])

@@ -48,3 +48,14 @@ elif runner.update_language:
       sys.exit(1)
     localization.update_language(runner.language)
   print("Finished updating.")
+elif runner.compile_language:
+  localization.load_languages()
+  if runner.language == 'all':
+    for l in globals.LANGUAGES[1:]:
+      localization.compile_message_catalog(l.name.lower())
+  else:
+    if not localization.language_exists(runner.language):
+      print("A language with this name doesn't exist.")
+      sys.exit(1)
+    localization.compile_message_catalog(runner.language)
+  print("Finished compiling.")
