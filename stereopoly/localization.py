@@ -3,10 +3,12 @@ from stereopoly.path import get_script_directory
 
 from babel.messages import (
   catalog,
-  extract
+  extract,
+  pofile
 )
 import gettext
 import natsort
+import os
 import os.path
 from yaml import load as yaml_load
 from yaml import dump as yaml_dump
@@ -27,26 +29,26 @@ class Language(object):
 
   @property
   def folder(self):
-    return os.path.join(get_script_directory(), 'locale', this.name.lower())
+    return os.path.join(get_script_directory(), 'locale', self.name.lower())
 
   def to_dict(self):
     return dict(id = self.id, name = self.name)
 
 def get_translation_catalog():
-  catalog = catalog.Catalog(fuzzy = False, charset = 'utf-8')
+  cat = catalog.Catalog(fuzzy = False, charset = 'utf-8')
   # we need to retrieve all translatable strings within the source
   tokens = extract.extract_from_dir(
     dirname = os.path.join(get_script_directory(), 'stereopoly'),
   )
 
   for token in tokens:
-    catalog.add(
+    cat.add(
       token[2],
       locations = (token[0], token[1], ),
       user_comments = token[3],
       context = token[4]
     )
-  return catalog
+  return cat
 
 def _(string, lang = None):
   if lang is None:
@@ -74,13 +76,20 @@ def add_new_language(lang):
   
   globals.LANGUAGES.append(Language(new_id, lang))
 
-  if len(globals.LANGUAGES):
-    langs = dict()
-    for l in globals.LANGUAGES[1:]:
-      langs[l.id] = l.name
-    data = yaml_dump(langs, Dumper = yaml_dumper, default_flow_style = False)
-    with open(os.path.join(get_script_directory(), 'var', 'languages.yml'), 'w') as f:
-      f.write(data)
+  # creating folder structure
+  os.makedirs(os.path.join(globals.LANGUAGES[-1].folder, 'LC_MESSAGES'), exist_ok=True)
+
+  cat = get_translation_catalog()
+
+  with open(os.path.join(globals.LANGUAGES[-1].folder, 'LC_MESSAGES', 'stereopoly.po'), 'wb') as f:
+    pofile.write_po(f, cat)
+
+  langs = dict()
+  for l in globals.LANGUAGES[1:]:
+    langs[l.id] = l.name
+  data = yaml_dump(langs, Dumper = yaml_dumper, default_flow_style = False)
+  with open(os.path.join(get_script_directory(), 'var', 'languages.yml'), 'w') as f:
+    f.write(data)
 
 def language_exists(lang):
   return lang in [l.name.lower() for l in globals.LANGUAGES]
