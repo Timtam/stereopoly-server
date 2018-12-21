@@ -10,6 +10,7 @@ class ArgumentParser(object):
   port = 5000
   private_key = None
   run = False
+  update_language = False
 
   def __init__(self):
     self.parser=argparse.ArgumentParser()
@@ -36,6 +37,13 @@ class ArgumentParser(object):
       type=str,
       help='name of the language which will be added'
     )
+    language_update_parser = language_subparsers.add_parser('update',
+      help='update po catalog for specific language'
+    )
+    language_update_parser.add_argument('lang',
+      type=str,
+      help='name of the language which will be updated'
+    )
     run_parser = global_subparsers.add_parser('run', help='run this server')
     run_parser.add_argument("-c", "--certificate-file", help="certificate pem file", type=str, default=None)
     run_parser.add_argument("-p", "--port", help="port to listen on", type=int, default=5000)
@@ -54,7 +62,10 @@ class ArgumentParser(object):
     elif args.subparser_name == 'language':
       if args.language_subparser_name == 'add':
         self.add_language = True
-        self.language = args.lang
+        self.language = args.lang.lower()
+      elif args.language_subparser_name == 'update':
+        self.update_language = True
+        self.language = args.lang.lower()
       else:
         self.parser.parse_args(['language', '--help'])
     else:

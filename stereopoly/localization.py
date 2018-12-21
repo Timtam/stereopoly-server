@@ -33,6 +33,10 @@ class Language(object):
   def folder(self):
     return os.path.join(get_script_directory(), 'locale', self.name.lower())
 
+  @property
+  def po_file(self):
+    return os.path.join(self.folder, 'LC_MESSAGES', 'stereopoly.po')
+
   def to_dict(self):
     return dict(id = self.id, name = self.name)
 
@@ -107,13 +111,12 @@ def add_new_language(lang):
 
   cat = get_message_catalog()
 
-  po_file = os.path.join(lc_folder, 'stereopoly.po')
+  po_file = globals.LANGUAGES[-1].po_file
   print("Writing file {0}".format(po_file))
 
   with open(po_file, 'wb') as f:
     pofile.write_po(f, cat)
 
-  
   print("Writing file {0}".format(LANGUAGES_FILE))
 
   langs = dict()
@@ -127,3 +130,25 @@ def add_new_language(lang):
 
 def language_exists(lang):
   return lang in [l.name.lower() for l in globals.LANGUAGES]
+
+def update_language(lang):
+  olang = [l for l in globals.LANGUAGES if l.name.lower() == lang][0]
+
+  print("Retrieving message catalog...")
+  
+  cat = get_message_catalog()
+
+  if not os.path.exists(olang.po_file):
+    print("No po file found.")
+  else:
+    print("Reading existing file {0}".format(olang.po_file))
+    with open(olang.po_file, 'r') as f:
+      ocat = pofile.read_po(f)
+    ocat.update(cat)
+    cat = ocat
+
+  print("Writing {0}".format(olang.po_file))
+  with open(olang.po_file, 'wb') as f:
+    pofile.write_po(f, cat)
+
+  print("Done.")

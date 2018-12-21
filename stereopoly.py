@@ -33,3 +33,9 @@ elif runner.add_language:
     print("A language with this name already exists.")
     sys.exit(1)
   localization.add_new_language(runner.language)
+elif runner.update_language:
+  localization.load_languages()
+  if not localization.language_exists(runner.language):
+    print("A language with this name doesn't exist.")
+    sys.exit(1)
+  localization.update_language(runner.language)
