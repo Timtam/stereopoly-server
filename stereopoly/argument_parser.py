@@ -42,7 +42,7 @@ class ArgumentParser(object):
     )
     language_update_parser.add_argument('lang',
       type=str,
-      help='name of the language which will be updated'
+      help='name of the language which will be updated (all to update all languages)'
     )
     run_parser = global_subparsers.add_parser('run', help='run this server')
     run_parser.add_argument("-c", "--certificate-file", help="certificate pem file", type=str, default=None)

@@ -132,7 +132,9 @@ def language_exists(lang):
   return lang in [l.name.lower() for l in globals.LANGUAGES]
 
 def update_language(lang):
+
   olang = [l for l in globals.LANGUAGES if l.name.lower() == lang][0]
+  print("Updating language {0}".format(olang.name))
 
   print("Retrieving message catalog...")
   

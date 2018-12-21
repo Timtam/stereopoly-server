@@ -2,6 +2,7 @@
 
 from stereopoly.argument_parser import ArgumentParser
 from stereopoly.db import setup as db_setup
+from stereopoly import globals
 from stereopoly.indexer import Indexer
 from stereopoly import localization
 from stereopoly.server import setup as server_setup
@@ -32,10 +33,18 @@ elif runner.add_language:
   if localization.language_exists(runner.language):
     print("A language with this name already exists.")
     sys.exit(1)
+  if runner.language.lower() == 'all':
+    print("A language with that name cannot be created.")
+    sys.exit(1)
   localization.add_new_language(runner.language)
 elif runner.update_language:
   localization.load_languages()
-  if not localization.language_exists(runner.language):
-    print("A language with this name doesn't exist.")
-    sys.exit(1)
-  localization.update_language(runner.language)
+  if runner.language == 'all':
+    for l in globals.LANGUAGES[1:]:
+      localization.update_language(l.name.lower())
+  else:
+    if not localization.language_exists(runner.language):
+      print("A language with this name doesn't exist.")
+      sys.exit(1)
+    localization.update_language(runner.language)
+  print("Finished updating.")
