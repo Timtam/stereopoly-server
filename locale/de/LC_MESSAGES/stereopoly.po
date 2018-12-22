@@ -1,0 +1,123 @@
+# Translations template for PROJECT.
+# Copyright (C) 2018 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2018-12-21 23:21+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.6.0\n"
+
+msgid "Unsupported app version"
+msgstr "Ungültige App-Version"
+
+msgid "Error parsing app version"
+msgstr "Fehler beim Erkennen der App-Version"
+
+msgid "No board found with that id"
+msgstr "Kein Spielbrett mit dieser ID gefunden"
+
+# name of board 1
+msgid "Classic €"
+msgstr "Klassisch €"
+
+# text of news 1
+msgid "Test Text 1"
+msgstr "Nachrichtentext 1"
+
+# text of news 2
+msgid "Test Text 2"
+msgstr "Nachrichtentext 2"
+
+# text of news 3
+msgid "Test Text 3"
+msgstr "Nachrichtentext 3"
+
+# text of news 4
+msgid "Test Text 4"
+msgstr "Nachrichtentext 4"
+
+# text of news 5
+msgid "Test Text 5"
+msgstr "Nachrichtentext 5"
+
+# text of news 6
+msgid "Test Text 6"
+msgstr "Nachrichtentext 6"
+
+# text of news 7
+msgid "Test Text 7"
+msgstr "Nachrichtentext 7"
+
+# text of news 8
+msgid "Test Text 8"
+msgstr "Nachrichtentext 8"
+
+# text of news 9
+msgid "Test Text 9"
+msgstr "Nachrichtentext 9"
+
+# text of news 10
+msgid "Pay {cost}"
+msgstr "Bezahle {cost}"
+
+# text of chance card 1
+msgid "Get free from jail."
+msgstr "Du kommst aus dem Gefängnis frei."
+
+# text of chance card 2
+msgid "Test chance card 2."
+msgstr "Ereigniskarte 2."
+
+# text of chance card 3
+msgid "Test chance card 3."
+msgstr "Ereigniskarte 3."
+
+# text of chance card 4
+msgid "Test chance card 4."
+msgstr "Ereigniskarte 4."
+
+# text of chance card 5
+msgid "Test chance card 5"
+msgstr "Ereigniskarte 5."
+
+# text of community chest card 1
+msgid "Community Chest card 1."
+msgstr "Gemeinschaftskarte 1."
+
+# text of community chest card 2
+msgid "Community Chest card 2."
+msgstr "Gemeinschaftskarte 2."
+
+# text of community chest card 3
+msgid "Community Chest card 3."
+msgstr "Gemeinschaftskarte 3."
+
+# text of community chest card 4
+msgid "Community Chest card 4."
+msgstr "Gemeinschaftskarte 4."
+
+# text of community chest card 5
+msgid "Community Chest card 5."
+msgstr "Gemeinschaftskarte 5."
+
+# name for money scheme 1
+msgid "{0} €"
+msgstr "{0} €"
+
+# name of board 2
+msgid "Classic DM"
+msgstr "Klassisch DM"
+
+# name for money scheme 2
+msgid "{0} DM"
+msgstr "{0} DM"
+
