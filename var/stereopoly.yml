@@ -21,10 +21,12 @@ parameters:
   language:
     in: query
     name: language
-    type: integer
-    description: language id for result
+    type: string
+    minLength: 2
+    maxLength: 2
+    description: language code the result will be translated to
     required: false
-    default: 0
+    default: "en"
 
 responses:
   error:

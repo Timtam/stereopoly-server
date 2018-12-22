@@ -26,16 +26,15 @@ except ImportError:
 
 class Language(object):
   code = ''
-  id = 0
   name = ''
 
-  def __init__(self, id = 0, name = 'English', code = 'en'):
-    self.id = id
+  def __init__(self, name = 'English', code = 'en'):
     if code and not name:
       self.name = pycountry.languages.get(alpha_2 = code).name
       self.code = code
     elif name and not code:
       self.code = pycountry.languages.get(name = self.name).alpha_2
+      self.name = name
     elif not name and not code:
       raise ValueError('Either name or code must be provided')
     else:
@@ -55,7 +54,7 @@ class Language(object):
     return os.path.join(self.folder, 'LC_MESSAGES', 'stereopoly.mo')
 
   def to_dict(self):
-    return dict(id = self.id, name = self.name, code = self.code)
+    return dict(name = self.name, code = self.code)
 
 def get_message_catalog():
   cat = catalog.Catalog(fuzzy = False, charset = 'utf-8')
@@ -105,9 +104,8 @@ def load_languages():
   if os.path.exists(LANGUAGES_FILE):
     with open(LANGUAGES_FILE, 'r') as f:
       langs = yaml_load(f, Loader = yaml_loader)
-      for id in langs.keys():
-        l = langs[id]
-        globals.LANGUAGES.append(Language(id = id, name = l['name'], code = l['code']))
+      for l in langs:
+        globals.LANGUAGES.append(Language(name = l['name'], code = l['code']))
   # injecting into global namespace
   sys.modules['builtins'].__dict__['_'] = _
 
@@ -131,11 +129,10 @@ def add_new_language(lang):
       return
   langname = lang.name
   langcode = lang.alpha_2
-  new_id = natsort.natsorted(globals.LANGUAGES, key = lambda l: l.id)[-1].id + 1
   
-  print("Creating language {0} ({1}) with id {2}".format(langname, langcode, new_id))
+  print("Creating language {0} ({1})".format(langname, langcode))
 
-  globals.LANGUAGES.append(Language(id = new_id, name = langname, code = langcode))
+  globals.LANGUAGES.append(Language(name = langname, code = langcode))
 
   # creating folder structure
   lc_folder = os.path.join(globals.LANGUAGES[-1].folder, 'LC_MESSAGES')
@@ -157,11 +154,10 @@ def add_new_language(lang):
 
   print("Writing file {0}".format(LANGUAGES_FILE))
 
-  langs = dict()
+  langs = list()
   for l in globals.LANGUAGES[1:]:
     d = l.to_dict()
-    langs[d['id']] = d
-    del d['id']
+    langs.append(d)
   data = yaml_dump(langs, Dumper = yaml_dumper, default_flow_style = False)
   with open(LANGUAGES_FILE, 'w') as f:
     f.write(data)
@@ -170,8 +166,7 @@ def add_new_language(lang):
 
 def find_language(lang):
   for l in globals.LANGUAGES[1:]:
-    if (isinstance(lang, int) and l.id == lang) or \
-       (not isinstance(lang, int) and l.name.lower() == lang.lower() or l.code.lower() == lang.lower()):
+    if l.name.lower() == lang.lower() or l.code.lower() == lang.lower():
       return l
   return None
 
