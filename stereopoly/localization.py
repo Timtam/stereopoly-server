@@ -10,7 +10,6 @@ from babel.messages import (
   pofile
 )
 import gettext
-import natsort
 import os
 import os.path
 import pycountry
