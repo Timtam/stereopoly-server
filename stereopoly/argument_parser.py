@@ -64,8 +64,8 @@ class ArgumentParser(object):
       self.index = True
     elif args.subparser_name == 'run':
       self.port = args.port
-      self.certificate_file = self.certificate_file
-      self.private_key = self.private_key
+      self.certificate_file = args.certificate_file
+      self.private_key = args.private_key
       self.run = True
     elif args.subparser_name == 'language':
       if args.language_subparser_name == 'add':
